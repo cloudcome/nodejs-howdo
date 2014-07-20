@@ -272,23 +272,22 @@ table.codehilitetable td.code div pre {
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; }
 }
-</style><title>readme</title></head><body><h1 id="_1"><a name="user-content-_1" href="#_1" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>如何做，一个简易的异步流程控制</h1>
-<h1 id="_2"><a name="user-content-_2" href="#_2" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>相关文章</h1>
+</style><title>readme</title></head><body><h1 id="howdo"><a name="user-content-howdo" href="#howdo" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>howdo<a href="https://npmjs.org/package/howdo"><img alt="NPM version" src="https://img.shields.io/npm/v/howdo.svg?style=flat" /></a></h1>
+<p>如何做，一个简易的异步流程控制</p>
+<h1 id="_1"><a name="user-content-_1" href="#_1" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>相关文章</h1>
 <p><a href="http://qianduanblog.com/post/nodejs-learning-17-howdo-a-simple-workflow-solutions.html"><a href="http://qianduanblog.com/post/nodejs-learning-17-howdo-a-simple-workflow-solutions.html"><a href="http://qianduanblog.com/post/nodejs-learning-17-howdo-a-simple-workflow-solutions.html">http://qianduanblog.com/post/nodejs-learning-17-howdo-a-simple-workflow-solutions.html</a></a></a></p>
 <ul>
 <li>这是一个简易的异步流程控制，API风格与NodeJs约定一致。</li>
 <li>API目前只有3个：<code>task</code>（分配任务）、 <code>together</code>（一起做）、<code>follow</code>（跟着做）。</li>
 <li>无论任务多复杂，都可以解耦成单个独立的任务来<strong>一起做</strong>或<strong>跟着做</strong>。</li>
-<li>目前尚未考虑多个任务重复做的情况，后续会考虑。</li>
 </ul>
-<p><img alt="howdo" src="https://nodei.co/npm/howdo.png?downloads=true&amp;amp;stars=true" /></p>
-<h1 id="_3"><a name="user-content-_3" href="#_3" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>安装</h1>
+<h1 id="_2"><a name="user-content-_2" href="#_2" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>安装</h1>
 <pre><code>npm install howdo
 </code></pre>
 
-<h1 id="_4"><a name="user-content-_4" href="#_4" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>示例</h1>
+<h1 id="_3"><a name="user-content-_3" href="#_3" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>示例</h1>
 <p>可以在模块的 <code>./test/</code> 文件下参考完整示例，并测试。每做一件事之前都必须实例化一次，可以链式操作，也可以断开操作。</p>
-<h2 id="_5"><a name="user-content-_5" href="#_5" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>一起做</h2>
+<h2 id="_4"><a name="user-content-_4" href="#_4" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>一起做</h2>
 <p>多个同步或异步的任务可以一起做，没有顺序和依赖关系，任何一个任务失败都会退出。<br />
 together结果的参数按照任务分配的顺序给出。</p>
 <pre><code>var Howdo = require('howdo');
@@ -308,6 +307,24 @@ howdo.task(function(done){
 })
 // 一起做
 .together(function(error, result1, result2, result3){
+    // ...
+});
+
+</code></pre>
+
+<h1 id="_5"><a name="user-content-_5" href="#_5" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>循环批量做</h1>
+<pre><code>var Howdo = require('howdo');
+var howdo = new Howdo();
+
+// 循环批量做
+[1,2,3].forEach(function(){
+    howdo.task(function(done){
+        done(error, result);
+    });
+});
+
+// 一起做
+hodo.together(function(error, result1, result2, result3){
     // ...
 });
 

@@ -1,4 +1,5 @@
-# 如何做，一个简易的异步流程控制
+# howdo[![NPM version](https://img.shields.io/npm/v/howdo.svg?style=flat)](https://npmjs.org/package/howdo)
+如何做，一个简易的异步流程控制
 
 # 相关文章
 [http://qianduanblog.com/post/nodejs-learning-17-howdo-a-simple-workflow-solutions.html](http://qianduanblog.com/post/nodejs-learning-17-howdo-a-simple-workflow-solutions.html)
@@ -6,8 +7,6 @@
 * 这是一个简易的异步流程控制，API风格与NodeJs约定一致。
 * API目前只有3个：`task`（分配任务）、 `together`（一起做）、`follow`（跟着做）。
 * 无论任务多复杂，都可以解耦成单个独立的任务来**一起做**或**跟着做**。
-
-![howdo](https://nodei.co/npm/howdo.png?downloads=true&amp;stars=true)
 
 
 
