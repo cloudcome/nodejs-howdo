@@ -1,0 +1,20 @@
+{
+  "name": "howdo",
+  "version": "0.0.5",
+  "description": "如何做，一个简易的异步流程控制",
+  "main": "index.js",
+  "keywords": [
+    "async",
+    "workflow",
+    "howdo"
+  ],
+  "author": {
+    "name": "cloudcome"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cloudcome/nodejs-howdo"
+  },
+  "license": "MIT",
+  "readmeFilename": "readme.md"
+}
