@@ -1,8 +1,8 @@
 {
   "name": "howdo",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "如何做，一个简易的异步流程控制",
-  "main": "index.js",
+  "main": "howdo.js",
   "keywords": [
     "async",
     "workflow",
