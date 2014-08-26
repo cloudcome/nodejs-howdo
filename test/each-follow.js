@@ -22,7 +22,7 @@ howdo
     1: 900,
 }, function(key, val, next, data1, data2) {
     console.log('正在做第' + (key*1 + 1) + '次事情，拿到的数据为：' + [data1, data2].join(','));
-    async('第' + (key + 1) + '次事情', function(err) {
+    async('第' + (key*1 + 1) + '次事情', function(err) {
         console.log('第' + (key*1 + 1) + '次事情做完了，next数据为：' + val);
         next(err, val);
     });
