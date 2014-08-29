@@ -101,7 +101,7 @@ var list = [1, 2, 3, 4];
 
 // 批量分配顺序串行任务
 howdo
-    .each(list, function (next, key, val, data) {
+    .each(list, function (key, val, next, data) {
         // 第1次： data = undefined
         // 第2次： data = 1
         // 第3次： data = 2
@@ -116,7 +116,7 @@ howdo
 
 // 批量分配顺序并行任务
 howdo
-    .each(list, function (done, key, val) {
+    .each(list, function (key, val, done) {
         done(null, val);
     })
     .together(function (err, data1, data2, data3, data4) {
@@ -187,3 +187,15 @@ howdo.task(function (done) {
 # MORE
 * [《nodejs学习17：howdo如何做，一个简易的异步流程控制》](http://qianduanblog.com/post/nodejs-learning-17-howdo-a-simple-workflow-solutions.html)
 * [《nodejs学习18：howdo——如何做，一个简易的流程控制，v1.0.0版本发布》](http://qianduanblog.com/post/nodejs-learning-18-howdo-how-to-do-a-simple-flow-control-v1-0-0-release.html)
+
+
+# VERSION
+## v 1.1.1
+* 修复空列表的each问题
+
+## v 1.1.0
+* 兼容到IE6、chrome、firefox
+* 兼容到nodejs
+
+## v 0.0.1
+* 初始版本
