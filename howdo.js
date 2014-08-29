@@ -193,6 +193,10 @@
             var count = tasks.length;
             var args = [];
 
+            if(!count){
+                return callback();
+            }
+
             (function _follow() {
                 var fn = function () {
                     args = [].slice.call(arguments);
@@ -253,8 +257,13 @@
             var count = tasks.length;
             var data = {};
             var hasCallback = !1;
+            var i = 0;
 
-            for (var i = 0; i < count; i++) {
+            if(!count){
+                return callback();
+            }
+
+            for (; i < count; i++) {
                 _doTask(i, tasks[i]);
             }
 

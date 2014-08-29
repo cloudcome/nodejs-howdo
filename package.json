@@ -1,6 +1,6 @@
 {
   "name": "howdo",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "如何做，一个简易的异步流程控制",
   "main": "howdo.js",
   "keywords": [
