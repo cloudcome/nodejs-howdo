@@ -133,7 +133,7 @@
             var i;
             var j;
 
-            if (object.constructor === Array) {
+            if (object && object.constructor === Array) {
                 for (i = 0, j = object.length; i < j; i++) {
                     task(i, object[i]);
                 }
