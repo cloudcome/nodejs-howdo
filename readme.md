@@ -84,7 +84,7 @@ howdo
     .task(function (done) {
         done(null, 4);
     })
-    .follow(function (err, data1, data2, data3, data4) {
+    .together(function (err, data1, data2, data3, data4) {
         // err = null
         // data1 = 1
         // data2 = 2
@@ -178,7 +178,7 @@ howdo.task(function (done) {
     request({
         url: '2'
     }, done);
-}).follow(function (err, data1, data2) {
+}).together(function (err, data1, data2) {
     // do sth...
 });
 ```
@@ -190,12 +190,13 @@ howdo.task(function (done) {
 
 
 # VERSION
-## v 1.1.1
-* 修复空列表的each问题
+## v 1.1.2
+- 修复空列表的each问题
+- 修正部分描述
 
 ## v 1.1.0
-* 兼容到IE6、chrome、firefox
-* 兼容到nodejs
+- 兼容到IE6、chrome、firefox
+- 兼容到nodejs
 
 ## v 0.0.1
-* 初始版本
+- 初始版本
