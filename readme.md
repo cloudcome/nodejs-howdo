@@ -1,5 +1,9 @@
 # howdo[![NPM version](https://img.shields.io/npm/v/howdo.svg?style=flat)](https://npmjs.org/package/howdo)
-如何做，一个简易的异步流程控制
+
+异步流程控制。
+
+入门指引：<http://FrontEndDev.org/column/howdo-introduction/>
+
 
 # FEATURES
 * nodejs（all）、browser（IE6/7/8/9/10/11、chrome、firefox）通用
@@ -16,7 +20,7 @@
 
 ## nodejs
 ```cmd
-npm i howdo -S
+npm i -S howdo
 ```
 
 ```js
@@ -184,18 +188,17 @@ howdo.task(function (done) {
 ```
 
 
-# MORE
-* [《nodejs学习17：howdo如何做，一个简易的异步流程控制》](http://qianduanblog.com/post/nodejs-learning-17-howdo-a-simple-workflow-solutions.html)
-* [《nodejs学习18：howdo——如何做，一个简易的流程控制，v1.0.0版本发布》](http://qianduanblog.com/post/nodejs-learning-18-howdo-how-to-do-a-simple-flow-control-v1-0-0-release.html)
-
 
 # VERSION
-## v 1.1.1
+## v1.1.4
+- 完善了一些描述
+
+## v1.1.1
 * 修复空列表的each问题
 
-## v 1.1.0
+## v1.1.0
 * 兼容到IE6、chrome、firefox
 * 兼容到nodejs
 
-## v 0.0.1
+## v0.0.1
 * 初始版本

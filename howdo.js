@@ -5,6 +5,7 @@
  * 2014年7月26日19:28:27
  * 2014年8月26日13:09:31
  * 2014年10月24日00:24:32
+ * 2015年04月29日13:57:13
  */
 
 
@@ -77,7 +78,7 @@
     Howdo.prototype = {
         /**
          * 单次分配任务
-         * @param {Function} 任务函数
+         * @param fn {Function} 任务函数
          * @return Howdo
          * @chainable
          * @example
@@ -211,7 +212,7 @@
             var tasks = this.tasks;
             var count = tasks.length;
             var args = [];
-            var doneTask = {};
+            //var doneTask = {};
 
             if (!count) {
                 return callback();
