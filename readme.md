@@ -20,7 +20,7 @@
 
 ## nodejs
 ```cmd
-npm i -S howdo
+npm install -S howdo
 ```
 
 ```js
@@ -28,7 +28,14 @@ var howdow = require('howdo');
 ```
 
 ## browser
-### Dir
+### CMD
+```
+defined(function(require, exports, module){
+    var howdo = require('./path/to/howdo.js');
+});
+```
+
+### 全局
 ```html
 <script src="/path/to/howdo.js"></script>
 <script>
@@ -37,21 +44,14 @@ var howdow = require('howdo');
 </script>
 ```
 
-### AMD
-```
-defined(['howdo'], function(howdo){
-    // do sth...
-});
-```
-
-### CJS
-```
-var howdo = require('howdo');
-// do sth...
-```
-
 
 # API
+遵守这个约定，回调的第一个参数为错误对象。
+```
+// err 为 null 或 undefined 时表示回调成功
+// 否则为回调失败
+callback(err, ...);
+```
 
 ## `#task` 分配单个任务，链式
 ```js
@@ -70,10 +70,13 @@ howdo
         // data3 = 3
         next(null, data1 + data2 + data3);
     })
-    .follow(function (err, data) {
-        // err = null
+    .try(function(data){
         // data = 6
-    });
+    })
+    .catch(function (err) {
+        // err = null
+    })
+    .follow();
 
 
 // 分配顺序并行任务
@@ -88,13 +91,16 @@ howdo
     .task(function (done) {
         done(null, 4);
     })
-    .follow(function (err, data1, data2, data3, data4) {
-        // err = null
+    .try(function(data1, data2, data3, data4){
         // data1 = 1
         // data2 = 2
         // data3 = 3
         // data4 = 4
-    });
+    })
+    .catch(function(err){
+        // err = null
+    })
+    .follow();
 ```
 
 ## `#each` 循环分配任务，链式
@@ -112,10 +118,13 @@ howdo
         // 第4次： data = 3
         next(null, val);
     })
-    .follow(function (err, data) {
-        // err = null
+    .try(function(data){
         // data = 4
-    });
+    })
+    .catch(function(err){
+        // err = null
+    })
+    .follow();
 
 
 // 批量分配顺序并行任务
@@ -123,73 +132,50 @@ howdo
     .each(list, function (key, val, done) {
         done(null, val);
     })
-    .together(function (err, data1, data2, data3, data4) {
-        // err = null
+    .try(function(data1, data2, data3, data4){
         // data1 = 1
         // data2 = 2
         // data3 = 3
         // data4 = 4
-    });
+    })
+    .catch(function(err){
+        // err = null
+    })
+    .together();
 ```
 
 
-## `#follow` 顺序串行任务，链式结束
+## `#follow` 顺序串行任务，链式
 
 `follow`用来收集任务结果，如其字面意思，表示多个任务是顺序串行执行的。
 
 
-## `#together` 顺序并行任务，链式结束
+## `#together` 顺序并行任务，链式
 
 `together`也是用来收集任务结果，如其字面意思，表示多个任务是顺序并行执行的。
 
 
-
-# Howdo VS AJAX
+## `try` 任务成功回调，链式
 ```
-// 此处以jquery为例
-// 首先来改装下 $.ajax
-function request(options, callback) {
-    $.ajax(options).done(function (json) {
-        if (json.error) {
-            return callback(new Error(json.error));
-        }
-
-        callback(null, json.data);
-    }).fail(function (jqXHR) {
-        callback(new Error(jqXHR.responseText));
-    });
-}
+.try(function(arg0, arg1, ...){
+    // ...
+})
+```
 
 
-howdo.task(function (next) {
-    request({
-        url: '1'
-    }, next);
-}).task(function (next) {
-    request({
-        url: '2'
-    }, next);
-}).follow(function (err, data) {
-    // do sth...
-});
-
-
-howdo.task(function (done) {
-    request({
-        url: '1'
-    }, done);
-}).task(function (done) {
-    request({
-        url: '2'
-    }, done);
-}).follow(function (err, data1, data2) {
-    // do sth...
-});
+## `catch` 任务失败回调，链式
+```
+.try(function(err){
+    // 任务失败的回调
+})
 ```
 
 
 
 # VERSION
+## 2.0.x
+- 增加了`try`、`catch`两个接口
+
 ## v1.1.4
 - 完善了一些描述
 
