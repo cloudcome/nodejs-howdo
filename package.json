@@ -1,6 +1,6 @@
 {
   "name": "howdo",
-  "version": "1.1.5",
+  "version": "2.0.0",
   "private": false,
   "description": "异步流程控制",
   "scripts": {},

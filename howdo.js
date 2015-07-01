@@ -5,31 +5,53 @@
  * 2014年7月26日19:28:27
  * 2014年8月26日13:09:31
  * 2014年10月24日00:24:32
- * 2015年04月29日13:57:13
+ * 2015年02月04日11:42:57
+ * 2015年07月01日17:35:20
  */
 
 
-(function (factory) {
     'use strict';
 
-    // CommonJS
-    if (typeof require === 'function' && typeof exports === "object" && typeof module === "object") {
-        factory(require, exports, module);
-    }
-    // CMD
-    else if (typeof define === "function") {
-        define(factory);
-    }
-    // window
-    else {
-        factory();
-    }
-})(function (require, exports, module) {
-    'use strict';
-
-    var _global = typeof global === 'undefined' ? window : global;
+    var _global = typeof window !== 'undefined' ? window : global;
     var slice = Array.prototype.slice;
-    var _howdo = {
+    var noop = function () {
+        // ignore
+    };
+    /**
+     * 判断是否为函数
+     * @param obj
+     * @returns {boolean}
+     */
+    var isFunction = function (obj) {
+        return typeof obj === 'function';
+    };
+
+
+    /**
+     * 遍历
+     * @param object
+     * @param callback
+     */
+    var each = function (object, callback) {
+        var i;
+        var j;
+
+        if (object && object.constructor === Array) {
+            for (i = 0, j = object.length; i < j; i++) {
+                callback(i, object[i]);
+            }
+        } else if (typeof object === "object") {
+            for (i in object) {
+                if (object.hasOwnProperty && object.hasOwnProperty(i)) {
+                    callback(i, object[i]);
+                } else {
+                    callback(i, object[i]);
+                }
+            }
+        }
+    };
+
+    module.exports = {
         task: function () {
             if (this.constructor === Howdo) {
                 return this;
@@ -53,32 +75,29 @@
     };
 
 
-    if (require) {
-        module.exports = _howdo;
-    }
-    else {
-        window.howdo = _howdo;
-    }
-
-
     //////////////////////////////////////////////////////////////////////
     /////////////////////////[ constructor ]//////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
     // 构造函数
     function Howdo() {
+        var the = this;
+
         // 任务队列
-        this.tasks = [];
+        the.tasks = [];
         // 是否已经开始执行任务了
-        this.hasStart = !1;
+        the.hasStart = false;
         // 标识任务序号
-        this.index = 0;
+        the.index = 0;
+        the._tryCallbacks = [];
+        the._catchCallbacks = [];
+        the._allCallback = null;
     }
 
     Howdo.prototype = {
         /**
          * 单次分配任务
-         * @param fn {Function} 任务函数
+         * @param {Function} fn 任务函数
          * @return Howdo
          * @chainable
          * @example
@@ -99,7 +118,7 @@
         task: function (fn) {
             var the = this;
 
-            if (typeof fn !== "function") {
+            if (!isFunction(fn)) {
                 throw new Error('howdo `task` must be a function');
             }
 
@@ -141,24 +160,8 @@
          */
         each: function (object, callback) {
             var howdo = this;
-            var i;
-            var j;
 
-            if (object && object.constructor === Array) {
-                for (i = 0, j = object.length; i < j; i++) {
-                    task(i, object[i]);
-                }
-            } else if (typeof object === "object") {
-                for (i in object) {
-                    if (object.hasOwnProperty && object.hasOwnProperty(i)) {
-                        task(i, object[i]);
-                    } else {
-                        task(i, object[i]);
-                    }
-                }
-            } else {
-                throw new Error('can not call each on' + object);
-            }
+            each(object, task);
 
             function task(key, val) {
                 howdo = howdo.task(function () {
@@ -197,25 +200,27 @@
          * });
          */
         follow: function (callback) {
-            if (this.hasStart) {
-                return;
+            var the = this;
+
+            if (the.hasStart) {
+                return the;
             }
 
-            if (typeof callback !== "function") {
-                throw new Error('howdo `follow` arguments[0] must be a function');
+            if (!isFunction(callback)) {
+                callback = noop;
             }
 
-
-            this.hasStart = !0;
+            the._allCallback = callback;
+            the.hasStart = true;
 
             var current = 0;
-            var tasks = this.tasks;
+            var tasks = the.tasks;
             var count = tasks.length;
             var args = [];
-            //var doneTask = {};
 
             if (!count) {
-                return callback();
+                the._fixCallback();
+                return the;
             }
 
             (function _follow() {
@@ -223,13 +228,13 @@
                     args = slice.call(arguments);
 
                     if (args[0]) {
-                        return callback.call(_global, args[0]);
+                        return the._fixCallback(args[0]);
                     }
 
                     current++;
 
                     if (current === count) {
-                        callback.apply(_global, args);
+                        the._fixCallback.apply(the, args);
                     } else if (current < count) {
                         args.shift();
                         _follow();
@@ -239,6 +244,8 @@
                 args.unshift(fn);
                 tasks[current].apply(_global, args);
             })();
+
+            return the;
         },
 
 
@@ -267,25 +274,29 @@
          * });
          */
         together: function (callback) {
-            if (this.hasStart) {
+            var the = this;
+
+            if (the.hasStart) {
                 return;
             }
 
-            if (typeof callback !== "function") {
-                throw new Error('howdo `together` arguments[0] must be a function');
+            if (!isFunction(callback)) {
+                callback = noop;
             }
 
-            this.hasStart = !0;
+            the._allCallback = callback;
+            the.hasStart = true;
 
             var done = 0;
-            var tasks = this.tasks;
+            var tasks = the.tasks;
             var count = tasks.length;
             var taskData = [];
-            var hasCallback = !1;
+            var hasCallback = false;
             var i = 0;
 
             if (!count) {
-                return callback();
+                the._fixCallback();
+                return the;
             }
 
             for (; i < count; i++) {
@@ -303,8 +314,8 @@
                     var i = 0;
 
                     if (args[0]) {
-                        hasCallback = !0;
-                        return callback.call(_global, args[0]);
+                        hasCallback = true;
+                        return the._fixCallback(args[0]);
                     }
 
                     taskData[index] = args.slice(1);
@@ -316,12 +327,60 @@
                         }
 
                         ret.unshift(null);
-                        callback.apply(_global, ret);
+                        the._fixCallback.apply(the, ret);
                     }
                 };
 
                 task(fn);
             }
+
+            return the;
+        },
+        /**
+         * 正常回调
+         * @param callback
+         */
+        try: function (callback) {
+            var the = this;
+
+            if (isFunction(callback)) {
+                the._tryCallbacks.push(callback);
+            }
+
+            return the;
+        },
+        /**
+         * 异常回调
+         * @param callback
+         */
+        catch: function (callback) {
+            var the = this;
+
+            if (isFunction(callback)) {
+                the._catchCallbacks.push(callback);
+            }
+
+            return the;
+        },
+        /**
+         * 修正回调
+         * @param err
+         * @private
+         */
+        _fixCallback: function (err/*arguments*/) {
+            var the = this;
+            var args = slice.call(arguments, 1);
+
+            the._allCallback.apply(_global, arguments);
+
+            if (err) {
+                return each(the._catchCallbacks, function (i, callback) {
+                    callback.call(_global, err);
+                });
+            }
+
+            each(the._tryCallbacks, function (i, callback) {
+                callback.apply(_global, args);
+            });
         }
     };
-});
