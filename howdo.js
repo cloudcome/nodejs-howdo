@@ -51,6 +51,14 @@ var each = function (object, callback) {
     }
 };
 
+/**
+ * 下一次
+ * @param callback
+ */
+var nextTick = function (callback) {
+    setTimeout(callback, 0);
+};
+
 module.exports = {
     task: function () {
         if (this.constructor === Howdo) {
@@ -219,32 +227,34 @@ Howdo.prototype = {
         var count = tasks.length;
         var args = [];
 
-        if (!count) {
-            the._fixCallback();
-            return the;
-        }
+        nextTick(function () {
+            if (!count) {
+                the._fixCallback();
+                return the;
+            }
 
-        (function _follow() {
-            var fn = function () {
-                args = slice.call(arguments);
+            (function _follow() {
+                var fn = function () {
+                    args = slice.call(arguments);
 
-                if (args[0]) {
-                    return the._fixCallback(args[0]);
-                }
+                    if (args[0]) {
+                        return the._fixCallback(args[0]);
+                    }
 
-                current++;
+                    current++;
 
-                if (current === count) {
-                    the._fixCallback.apply(the, args);
-                } else if (current < count) {
-                    args.shift();
-                    _follow();
-                }
-            };
+                    if (current === count) {
+                        the._fixCallback.apply(the, args);
+                    } else if (current < count) {
+                        args.shift();
+                        _follow();
+                    }
+                };
 
-            args.unshift(fn);
-            tasks[current].apply(_global, args);
-        })();
+                args.unshift(fn);
+                tasks[current].apply(_global, args);
+            })();
+        });
 
         return the;
     },
@@ -296,45 +306,47 @@ Howdo.prototype = {
         var hasCallback = false;
         var i = 0;
 
-        if (!count) {
-            the._fixCallback();
-            return the;
-        }
+        nextTick(function () {
+            if (!count) {
+                the._fixCallback();
+                return the;
+            }
 
-        for (; i < count; i++) {
-            _doTask(i, tasks[i]);
-        }
+            for (; i < count; i++) {
+                _doTask(i, tasks[i]);
+            }
 
-        function _doTask(index, task) {
-            var fn = function () {
-                if (hasCallback) {
-                    return;
-                }
-
-                var args = slice.call(arguments);
-                var ret = [];
-                var i = 0;
-
-                if (args[0]) {
-                    hasCallback = true;
-                    return the._fixCallback(args[0]);
-                }
-
-                taskData[index] = args.slice(1);
-                done++;
-
-                if (done === count) {
-                    for (; i < taskData.length; i++) {
-                        ret = ret.concat(taskData[i]);
+            function _doTask(index, task) {
+                var fn = function () {
+                    if (hasCallback) {
+                        return;
                     }
 
-                    ret.unshift(null);
-                    the._fixCallback.apply(the, ret);
-                }
-            };
+                    var args = slice.call(arguments);
+                    var ret = [];
+                    var i = 0;
 
-            task(fn);
-        }
+                    if (args[0]) {
+                        hasCallback = true;
+                        return the._fixCallback(args[0]);
+                    }
+
+                    taskData[index] = args.slice(1);
+                    done++;
+
+                    if (done === count) {
+                        for (; i < taskData.length; i++) {
+                            ret = ret.concat(taskData[i]);
+                        }
+
+                        ret.unshift(null);
+                        the._fixCallback.apply(the, ret);
+                    }
+                };
+
+                task(fn);
+            }
+        });
 
         return the;
     },
