@@ -2,11 +2,12 @@
  * Howdo
  * 适应了 global 与 window
  * @author ydr.me
- * 2014年7月26日19:28:27
- * 2014年8月26日13:09:31
- * 2014年10月24日00:24:32
- * 2015年02月04日11:42:57
- * 2015年07月01日17:35:20
+ * @create 2014年7月26日19:28:27
+ * @update 2014年8月26日13:09:31
+ * @update 2014年10月24日00:24:32
+ * @update 2015年02月04日11:42:57
+ * @update 2015年07月01日17:35:20
+ * @update 2015年11月27日10:57:12@3.0.0
  */
 
 
@@ -103,6 +104,8 @@ function Howdo() {
 }
 
 Howdo.prototype = {
+    constructor: Howdo,
+
     /**
      * 单次分配任务
      * @param {Function} fn 任务函数
@@ -127,11 +130,29 @@ Howdo.prototype = {
         var the = this;
 
         if (!isFunction(fn)) {
-            throw new Error('howdo `task` must be a function');
+            throw new TypeError('howdo `task` must be a function');
         }
 
         fn.index = the.index++;
         the.tasks.push(fn);
+
+        return the;
+    },
+
+
+    /**
+     * 直到 结束
+     * @param fn
+     * @returns {Howdo}
+     */
+    until: function (fn) {
+        var the = this;
+
+        if (!isFunction(fn)) {
+            throw new TypeError('until `condition` must be a function');
+        }
+
+        the._untilCondition = fn;
 
         return the;
     },
@@ -243,7 +264,16 @@ Howdo.prototype = {
 
                     current++;
 
-                    if (current === count) {
+                    var canStop = false;
+
+                    if (the._untilCondition) {
+                        canStop = the._untilCondition.apply(_global, args.slice(1));
+                        current += canStop ? 0 : -1;
+                    } else {
+                        canStop = current === count;
+                    }
+
+                    if (canStop) {
                         the._fixCallback.apply(the, args);
                     } else if (current < count) {
                         args.shift();
@@ -258,7 +288,6 @@ Howdo.prototype = {
 
         return the;
     },
-
 
     /**
      * 一起做，任务并行执行
@@ -290,6 +319,10 @@ Howdo.prototype = {
 
         if (the.hasStart) {
             return;
+        }
+
+        if (the._untilCondition) {
+            throw new SyntaxError('`together` do not support `until`, please use `follow`');
         }
 
         if (!isFunction(callback)) {
@@ -350,6 +383,7 @@ Howdo.prototype = {
 
         return the;
     },
+
     /**
      * 正常回调
      * @param callback
@@ -363,6 +397,7 @@ Howdo.prototype = {
 
         return the;
     },
+
     /**
      * 异常回调
      * @param callback
@@ -376,6 +411,7 @@ Howdo.prototype = {
 
         return the;
     },
+
     /**
      * 修正回调
      * @param err

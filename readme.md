@@ -173,6 +173,9 @@ howdo
 
 
 # VERSION
+## 3.0.x
+- 增加了`until`接口
+
 ## 2.0.x
 - 增加了`try`、`catch`两个接口
 
