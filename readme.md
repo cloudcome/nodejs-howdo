@@ -1,4 +1,9 @@
-# howdo[![NPM version](https://img.shields.io/npm/v/howdo.svg?style=flat)](https://npmjs.org/package/howdo)
+[![howdo][shields-img]][shields-url]
+
+[travis-img]: https://travis-ci.org/cloudcome/nodejs-howdo.svg?branch=master
+[travis-url]: https://travis-ci.org/cloudcome/nodejs-howdo
+[shields-img]: https://img.shields.io/npm/v/howdo.svg
+[shields-url]: https://www.npmjs.com/package/howdo
 
 异步流程控制。
 
