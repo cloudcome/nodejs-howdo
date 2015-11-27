@@ -14,7 +14,7 @@ var utils = require('./_utils.js');
 
 
 describe('until', function () {
-    it('no each', function (done) {
+    it('follow', function (done) {
         howdo
             .task(function (next) {
                 utils.async(null, Math.random())(next, 0);
@@ -25,6 +25,7 @@ describe('until', function () {
             .follow(function (err, value) {
                 console.log('follow', '=', value);
                 assert.equal(value > 0.8, true);
+                done();
             });
     });
 });
