@@ -177,6 +177,23 @@ howdo
 ```
 
 
+## `until`直到条件达成，否则一直继续
+```
+howdo
+    .task(function(next){
+        setTimeout(function(){
+            next(null, Math.random());
+        }, 500);
+    })
+    .until(function(value){
+        return value > 0.8;
+    })
+    .try(function(value){
+        value > 0.8 === true;
+    })
+    .follow();
+```
+
 
 # VERSION
 ## 3.0.x
