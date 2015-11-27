@@ -1,9 +1,11 @@
 {
   "name": "howdo",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "private": false,
   "description": "异步流程控制",
-  "scripts": {},
+  "scripts": {
+    "test": "node node_modules/mocha/bin/mocha -c --recursive --ui bdd test -t 0"
+  },
   "preferGlobal": false,
   "bin": {},
   "engines": {
@@ -32,6 +34,8 @@
   },
   "dependencies": {},
   "peerDependencies": {},
-  "devDependencies": {},
-  "licenses": "MIT"
+  "devDependencies": {
+    "mocha": "^2.3.4"
+  },
+  "license": "MIT"
 }

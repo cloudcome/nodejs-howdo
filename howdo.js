@@ -1,4 +1,4 @@
-/*!
+/**
  * Howdo
  * 适应了 global 与 window
  * @author ydr.me
