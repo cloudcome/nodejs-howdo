@@ -1,3 +1,4 @@
+[![Build Status][travis-img]][travis-url] 
 [![howdo][shields-img]][shields-url]
 
 [travis-img]: https://travis-ci.org/cloudcome/nodejs-howdo.svg?branch=master
