@@ -51,10 +51,12 @@ describe('together', function () {
             .task(function (done) {
                 this.timeid = setTimeout(function () {
                     a += 1;
+                    console.log('任务1失败');
                     done(new Error(''), 1);
                 }, 100);
             })
             .rollback(function () {
+                console.log('回退任务1');
                 a -= 1;
             })
             .abort(function () {
@@ -68,6 +70,7 @@ describe('together', function () {
                 }, 200);
             })
             .rollback(function () {
+                console.log('回退任务2');
                 a -= 2;
             })
             .abort(function () {
@@ -81,6 +84,7 @@ describe('together', function () {
                 }, 300);
             })
             .rollback(function () {
+                console.log('回退任务3');
                 a -= 3;
             })
             .abort(function () {
@@ -95,7 +99,4 @@ describe('together', function () {
             });
     });
 });
-
-
-//
 
