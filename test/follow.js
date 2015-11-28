@@ -45,11 +45,11 @@ describe('follow', function () {
         howdo
             .task(function (next) {
                 a++;
-                this.rollback = function () {
-                    console.log('rollback', 1);
-                    a--;
-                };
                 next();
+            })
+            .rollback(function () {
+                console.log('rollback', 1);
+                a--;
             })
             .task(function (next) {
                 setTimeout(function () {

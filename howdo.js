@@ -101,11 +101,12 @@ function Howdo() {
     // 任务队列
     the.tasks = [];
     // 是否已经开始执行任务了
-    the.hasStart = false;
+    the._executed = false;
     // 标识任务序号
     the.index = 0;
-    the._tryCallbacks = [];
-    the._catchCallbacks = [];
+    the._tryCallbackList = [];
+    the._catchCallbackList = [];
+    the._contexts = [];
     the._allCallback = null;
     the._ignoreErr = false;
 }
@@ -130,6 +131,11 @@ Howdo.prototype = {
         the.tasks.push(fn);
 
         return the;
+    },
+
+
+    rollback: function () {
+
     },
 
 
@@ -184,7 +190,7 @@ Howdo.prototype = {
     follow: function (callback) {
         var the = this;
 
-        if (the.hasStart) {
+        if (the._executed) {
             return the;
         }
 
@@ -193,13 +199,14 @@ Howdo.prototype = {
         }
 
         the._allCallback = callback;
-        the.hasStart = true;
+        the._executed = true;
 
         var current = 0;
         var tasks = the.tasks;
         var contextList = [];
         var count = tasks.length;
         var args = [];
+        // 串行回退已成功的任务
         var rollbackTask = function () {
             each(contextList, function (index, context) {
                 if (!context) {
@@ -272,7 +279,7 @@ Howdo.prototype = {
     together: function (callback) {
         var the = this;
 
-        if (the.hasStart) {
+        if (the._executed) {
             return;
         }
 
@@ -281,7 +288,7 @@ Howdo.prototype = {
         }
 
         the._allCallback = callback;
-        the.hasStart = true;
+        the._executed = true;
 
         var doneLength = 0;
         var tasks = the.tasks;
@@ -293,14 +300,12 @@ Howdo.prototype = {
 
         // 中止未完成的 task
         var abortTask = function () {
-            for (i = 0; i < count; i++) {
-                var context = contxtList[i];
-
+            each(contxtList, function (index, context) {
                 if (!context.done && isFunction(context.abort)) {
                     context.abort.call(context);
                     context.done = true;
                 }
-            }
+            });
         };
 
         nextTick(function () {
@@ -393,7 +398,7 @@ Howdo.prototype = {
         var the = this;
 
         if (isFunction(callback)) {
-            the._tryCallbacks.push(callback);
+            the._tryCallbackList.push(callback);
         }
 
         return the;
@@ -407,7 +412,7 @@ Howdo.prototype = {
         var the = this;
 
         if (isFunction(callback)) {
-            the._catchCallbacks.push(callback);
+            the._catchCallbackList.push(callback);
         }
 
         return the;
@@ -425,12 +430,12 @@ Howdo.prototype = {
         the._allCallback.apply(_global, arguments);
 
         if (err) {
-            return each(the._catchCallbacks, function (i, callback) {
+            return each(the._catchCallbackList, function (i, callback) {
                 callback.call(_global, err);
             });
         }
 
-        each(the._tryCallbacks, function (i, callback) {
+        each(the._tryCallbackList, function (i, callback) {
             callback.apply(_global, args);
         });
     }
