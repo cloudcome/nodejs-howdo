@@ -1,8 +1,8 @@
 {
   "name": "howdo",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "private": false,
-  "description": "异步流程控制",
+  "description": "任务流程控制",
   "scripts": {
     "test": "node node_modules/mocha/bin/mocha -c --recursive --ui bdd test -t 0"
   },

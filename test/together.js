@@ -100,3 +100,29 @@ describe('together', function () {
     });
 });
 
+
+
+var a = 1;
+
+howdo
+    .task(function(next){
+        this.timeid = setTimeout(function(){
+            a++;
+            next(new Error('任务1出错'));
+        }, 100);
+    })
+    .rollback(function(){
+        a--;
+    })
+    .task(function(next){
+        this.timeid = setTimeout(function(){
+            a++;
+            next(new Error('任务2出错'));
+        }, 200);
+    })
+    .abort(function(){
+        clearTimeout(this.timeid);
+    })
+    .together(function(){
+        console.log(a === 1);
+    });

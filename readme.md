@@ -6,20 +6,19 @@
 [shields-img]: https://img.shields.io/npm/v/howdo.svg
 [shields-url]: https://www.npmjs.com/package/howdo
 
-异步流程控制。
+任务流程控制。
 
 入门指引：<http://FrontEndDev.org/column/howdo-introduction/>
 
 
 # FEATURES
-* nodejs（all）、browser（IE6/7/8/9/10/11、chrome、firefox）通用
-* 注重约定
-* 同步、异步任务都支持
-* 支持顺序串行任务
-* 支持顺序并行任务
-* 自动实例化
-* 链式操作
-
+- node、浏览器通用
+- 任务流程控制，支持同步、异步任务
+- 支持串行、并行任务
+- 支持捕获任务的错误
+- 支持中止任务
+- 支持回退任务
+- 支持无限任务
 
 
 # INSTALL
@@ -76,13 +75,13 @@ howdo
         // data3 = 3
         next(null, data1 + data2 + data3);
     })
+    .follow()
     .try(function(data){
         // data = 6
     })
     .catch(function (err) {
         // err = null
-    })
-    .follow();
+    });
 
 
 // 分配顺序并行任务
@@ -97,6 +96,7 @@ howdo
     .task(function (done) {
         done(null, 4);
     })
+    .follow()
     .try(function(data1, data2, data3, data4){
         // data1 = 1
         // data2 = 2
@@ -105,8 +105,7 @@ howdo
     })
     .catch(function(err){
         // err = null
-    })
-    .follow();
+    });
 ```
 
 ## `#each` 循环分配任务，链式
@@ -124,13 +123,13 @@ howdo
         // 第4次： data = 3
         next(null, val);
     })
+    .follow()
     .try(function(data){
         // data = 4
     })
     .catch(function(err){
         // err = null
-    })
-    .follow();
+    });
 
 
 // 批量分配顺序并行任务
@@ -138,6 +137,7 @@ howdo
     .each(list, function (key, val, done) {
         done(null, val);
     })
+    .together()
     .try(function(data1, data2, data3, data4){
         // data1 = 1
         // data2 = 2
@@ -146,8 +146,7 @@ howdo
     })
     .catch(function(err){
         // err = null
-    })
-    .together();
+    });
 ```
 
 
@@ -195,24 +194,70 @@ howdo
 ```
 
 
+## `rollback`回滚任务
+```
+var a = 1;
+
+howdo
+    .task(function(next){
+        a++;
+        setTimeout(function(){
+            next(new Error('任务出错'));
+        });
+    })
+    .rollback(function(){
+        a--;
+    })
+    .follow(function(){
+        a === 1;
+    });
+```
+
+
+## `abort`中止任务
+```
+var a = 1;
+
+howdo
+    .task(function(next){
+        this.timeid = setTimeout(function(){
+            a++;
+            next(new Error('任务1出错'));
+        }, 100);
+    })
+    .rollback(function(){
+        a--;
+    })
+    .task(function(next){
+        this.timeid = setTimeout(function(){
+            a++;
+            next(new Error('任务2出错'));
+        }, 200);
+    })
+    .abort(function(){
+        clearTimeout(this.timeid);
+    })
+    .together(function(){
+        a === 1;
+    });
+```
+
+
+
 # VERSION
 ## 3.2.x
 - 增加了`until`接口，支持串行和并行
-- 支持了串行出错回滚`this.rollback`
-- 支持了并行出错中止`this.abort`
+- 增加了`rollback`接口，回滚任务
+- 增加了`abort`接口，中止任务
 
-## 2.0.x
+
+## 2.x
 - 增加了`try`、`catch`两个接口
 
-## v1.1.4
-- 完善了一些描述
 
-## v1.1.1
-* 修复空列表的each问题
+## v1.x
+- 增加了`.task`任务接口
+- 增加了`.each`循环接口
+- 增加了`.follow`串行接口
+- 增加了`.together`并行接口
 
-## v1.1.0
-* 兼容到IE6、chrome、firefox
-* 兼容到nodejs
-
-## v0.0.1
-* 初始版本
