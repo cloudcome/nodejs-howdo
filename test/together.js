@@ -14,7 +14,7 @@ var utils = require('./_utils.js');
 
 
 describe('together', function () {
-    it('no each', function (done) {
+    xit('no each', function (done) {
         howdo
             .task(utils.async(1))
             .task(utils.async(2))
@@ -29,7 +29,8 @@ describe('together', function () {
                 done();
             });
     });
-    it('each', function (done) {
+
+    xit('each', function (done) {
         howdo
             .each(new Array(4), function (index, value, next) {
                 utils.async(index + 1)(next);
@@ -41,6 +42,56 @@ describe('together', function () {
                 assert.equal(val3, 3);
                 assert.equal(val4, 4);
                 done();
+            });
+    });
+
+    it('rollback', function (done) {
+        var a = 1;
+        howdo
+            .task(function (done) {
+                this.timeid = setTimeout(function () {
+                    a += 1;
+                    done(new Error(''), 1);
+                }, 100);
+            })
+            .rollback(function () {
+                a -= 1;
+            })
+            .abort(function () {
+                console.log('中止任务1');
+                clearTimeout(this.timeid);
+            })
+            .task(function (done) {
+                this.timeid = setTimeout(function () {
+                    a += 2;
+                    done(null, 2);
+                }, 200);
+            })
+            .rollback(function () {
+                a -= 2;
+            })
+            .abort(function () {
+                console.log('中止任务2');
+                clearTimeout(this.timeid);
+            })
+            .task(function (done) {
+                this.timeid = setTimeout(function () {
+                    a += 3;
+                    done(null, 3);
+                }, 300);
+            })
+            .rollback(function () {
+                a -= 3;
+            })
+            .abort(function () {
+                console.log('中止任务3');
+                clearTimeout(this.timeid);
+            })
+            .together(function () {
+                setTimeout(function () {
+                    assert.equal(a, 1);
+                    done();
+                }, 1000);
             });
     });
 });

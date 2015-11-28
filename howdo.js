@@ -136,7 +136,7 @@ Howdo.prototype = {
 
 
     /**
-     * 添加任务回退、中止方法
+     * 添加任务回退方法
      * @param rollback {Function} 回退、中止方法
      * @returns {Howdo}
      */
@@ -145,6 +145,22 @@ Howdo.prototype = {
 
         if (the._taskIndex > -1 && isFunction(rollback)) {
             the._contextList[the._taskIndex].rollback = rollback;
+        }
+
+        return the;
+    },
+
+
+    /**
+     * 添加任务回退方法
+     * @param abort {Function} 回退、中止方法
+     * @returns {Howdo}
+     */
+    abort: function (abort) {
+        var the = this;
+
+        if (the._taskIndex > -1 && isFunction(abort)) {
+            the._contextList[the._taskIndex].abort = abort;
         }
 
         return the;
@@ -298,7 +314,6 @@ Howdo.prototype = {
         the._executed = true;
 
         var doneLength = 0;
-        var contxtList = [];
         var count = the._taskList.length;
         var taskData = [];
         var hasCallback = false;
@@ -306,10 +321,19 @@ Howdo.prototype = {
 
         // 中止未完成的 task
         var abortTask = function () {
-            each(contxtList, function (index, context) {
+            hasCallback = true;
+            each(the._contextList, function (index, context) {
                 if (!context.done && isFunction(context.abort)) {
                     context.abort.call(context);
-                    context.done = true;
+                }
+            });
+        };
+
+        // 回退已经完成的 task
+        var rollbackTask = function () {
+            each(the._contextList, function (index, context) {
+                if (context.done && isFunction(context.rollback)) {
+                    context.rollback.call(context);
                 }
             });
         };
@@ -322,16 +346,11 @@ Howdo.prototype = {
             }
 
             for (; i < count; i++) {
-                contxtList[i] = {
-                    index: i,
-                    done: false,
-                    task: the._taskList[i]
-                };
                 _doTask(i, the._taskList[i]);
             }
 
             function _doTask(index, task) {
-                var context = contxtList[index];
+                var context = the._contextList[index];
                 var fn = function () {
                     if (hasCallback) {
                         return;
@@ -345,8 +364,8 @@ Howdo.prototype = {
 
                     // has Error
                     if (args[0] && !the._ignoreErr) {
-                        hasCallback = true;
                         abortTask();
+                        rollbackTask();
                         return the._fixCallback(args[0]);
                     }
 
@@ -369,7 +388,6 @@ Howdo.prototype = {
 
                             ret.unshift(null);
                             abortTask();
-                            hasCallback = true;
                             the._fixCallback.apply(the, ret);
                         }
                     } else {
@@ -383,7 +401,6 @@ Howdo.prototype = {
 
                             ret.unshift(null);
                             abortTask();
-                            hasCallback = true;
                             the._fixCallback.apply(the, ret);
                         }
                     }

@@ -14,7 +14,7 @@ var utils = require('./_utils.js');
 
 
 describe('follow', function () {
-    xit('no each', function (done) {
+    it('no each', function (done) {
         howdo
             .task(utils.async(1))
             .task(utils.async(2))
@@ -27,7 +27,7 @@ describe('follow', function () {
             });
     });
 
-    xit('each', function (done) {
+    it('each', function (done) {
         howdo
             .each(new Array(4), function (index, value, next) {
                 utils.async(index + 1)(next);
