@@ -15,20 +15,25 @@ var utils = require('./_utils.js');
 var async = function (callback) {
     var index = this.index;
     var timeout = utils.random(300, 900);
-    var timeId = setTimeout(function () {
+
+    this.timeId = setTimeout(function () {
         var value = Math.random();
         console.log('[' + index + ']', value);
         callback(null, value);
     }, timeout);
+};
 
-    this.abort = function () {
-        console.log('被中止', this.index);
-        clearTimeout(timeId);
-    };
+var rollback = function () {
+    console.log('回退任务', this.index);
+};
+
+var abort = function () {
+    console.log('中止任务', this.index);
+    clearTimeout(this.timeId);
 };
 
 describe('until', function () {
-    it('follow', function (done) {
+    xit('follow', function (done) {
         howdo
             .task(async)
             .until(function (value) {
@@ -45,16 +50,27 @@ describe('until', function () {
     it('together', function (done) {
         howdo
             .task(async)
-            .task(async)
-            .task(async)
-            .task(async)
-            .task(async)
-            .task(async)
-            .task(async)
-            .task(async)
-            .task(async)
-            .task(async)
-            .task(async)
+            .abort(abort)
+            .rollback(rollback)
+            //.task(async)
+            //.rollback(rollback)
+            //.task(async)
+            //.rollback(rollback)
+            //.task(async)
+            //.rollback(rollback)
+            //.task(async)
+            //.rollback(rollback)
+            //.task(async)
+            //.rollback(rollback)
+            //.task(async)
+            //.rollback(rollback)
+            //.task(async)
+            //.rollback(rollback)
+            //.task(async)
+            //.rollback(rollback)
+            //.task(async)
+            //.rollback(rollback)
+            //.task(async)
             .until(function (value) {
                 return value > 0.8;
             })
