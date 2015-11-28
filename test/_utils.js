@@ -8,41 +8,16 @@
 'use strict';
 
 
-/**
- * 模拟异步
- * @param err
- * @param value
- * @returns {Function}
- */
-exports.async = function (err, value) {
-    return function (callback, prevValue) {
-        var timeout = Math.round(300 + Math.random() * 300);
+exports.random = function (min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+};
 
-        prevValue = prevValue === undefined ? 0 : prevValue;
+exports.async = function (value) {
+    return function (callback) {
+        var timeout = exports.random(300, 500);
         setTimeout(function () {
-            console.log('[' + timeout + 'ms]',
-                'prevValue', '=', prevValue, ',',
-                'value', '=', value, ',',
-                'nextValue', '=', prevValue, '+', value, '=', prevValue + value);
-            callback(err ? new Error('async error') : null, value + prevValue);
+            console.log('[' + timeout + ']', value);
+            callback(null, value);
         }, timeout);
     };
-};
-
-
-/**
- * 合并取值
- * @param args
- * @returns {number}
- */
-exports.togetherValue = function (args) {
-    args = [].slice.call(args).slice(0);
-    var ret = 0;
-
-    args.forEach(function (value) {
-        ret += value;
-    });
-
-    return ret;
-};
-
+}

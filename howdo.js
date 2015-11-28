@@ -101,6 +101,7 @@ function Howdo() {
     the._tryCallbacks = [];
     the._catchCallbacks = [];
     the._allCallback = null;
+    the._ignoreErr = false;
 }
 
 Howdo.prototype = {
@@ -142,10 +143,11 @@ Howdo.prototype = {
 
     /**
      * 直到 结束
-     * @param fn
+     * @param fn {Function} 验证函数
+     * @param [ignoreError] {Boolean} 是否忽略错误
      * @returns {Howdo}
      */
-    until: function (fn) {
+    until: function (fn, ignoreError) {
         var the = this;
 
         if (!isFunction(fn)) {
@@ -153,6 +155,7 @@ Howdo.prototype = {
         }
 
         the._untilCondition = fn;
+        the._ignoreErr = ignoreError !== false;
 
         return the;
     },
@@ -258,7 +261,7 @@ Howdo.prototype = {
                 var fn = function () {
                     args = slice.call(arguments);
 
-                    if (args[0]) {
+                    if (args[0] && !the._ignoreErr) {
                         return the._fixCallback(args[0]);
                     }
 
@@ -321,10 +324,6 @@ Howdo.prototype = {
             return;
         }
 
-        if (the._untilCondition) {
-            throw new SyntaxError('`together` do not support `until`, please use `follow`');
-        }
-
         if (!isFunction(callback)) {
             callback = noop;
         }
@@ -332,7 +331,7 @@ Howdo.prototype = {
         the._allCallback = callback;
         the.hasStart = true;
 
-        var done = 0;
+        var doneLength = 0;
         var tasks = the.tasks;
         var count = tasks.length;
         var taskData = [];
@@ -359,21 +358,44 @@ Howdo.prototype = {
                     var ret = [];
                     var i = 0;
 
-                    if (args[0]) {
+                    // has Error
+                    if (args[0] && !the._ignoreErr) {
                         hasCallback = true;
                         return the._fixCallback(args[0]);
                     }
 
-                    taskData[index] = args.slice(1);
-                    done++;
+                    var canStop = false;
+                    var value = args.slice(1);
 
-                    if (done === count) {
-                        for (; i < taskData.length; i++) {
-                            ret = ret.concat(taskData[i]);
+                    if (the._untilCondition) {
+                        canStop = the._untilCondition.apply(_global, value);
+
+                        if (canStop) {
+                            doneLength = count;
+                        } else {
+                            doneLength++;
                         }
 
-                        ret.unshift(null);
-                        the._fixCallback.apply(the, ret);
+                        if (doneLength === count) {
+                            if (canStop) {
+                                ret = ret.concat(value);
+                            }
+
+                            ret.unshift(null);
+                            the._fixCallback.apply(the, ret);
+                        }
+                    } else {
+                        doneLength++;
+                        taskData[index] = value;
+
+                        if (doneLength === count) {
+                            for (; i < taskData.length; i++) {
+                                ret = ret.concat(taskData[i]);
+                            }
+
+                            ret.unshift(null);
+                            the._fixCallback.apply(the, ret);
+                        }
                     }
                 };
 

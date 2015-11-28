@@ -16,24 +16,24 @@ var utils = require('./_utils.js');
 describe('follow', function () {
     it('no each', function (done) {
         howdo
-            .task(utils.async(null, 1))
-            .task(utils.async(null, 2))
-            .task(utils.async(null, 3))
-            .task(utils.async(null, 4))
-            .follow(function (err, value) {
-                assert.equal(!err, true);
-                assert.equal(value, 10);
+            .task(utils.async(1))
+            .task(utils.async(2))
+            .task(utils.async(3))
+            .task(utils.async(4))
+            .follow()
+            .try(function (value) {
+                assert.equal(value, 4);
                 done();
             });
     });
     it('each', function (done) {
         howdo
             .each(new Array(4), function (index, value, next) {
-                utils.async(null, index)(next);
+                utils.async(index + 1)(next);
             })
-            .follow(function (err, value) {
-                assert.equal(!err, true);
-                assert.equal(value, 3);
+            .follow()
+            .try(function (value) {
+                assert.equal(value, 4);
                 done();
             });
     });

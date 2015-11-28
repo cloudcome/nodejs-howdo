@@ -188,16 +188,16 @@ howdo
     .until(function(value){
         return value > 0.8;
     })
+    .follow()
     .try(function(value){
         value > 0.8 === true;
-    })
-    .follow();
+    });
 ```
 
 
 # VERSION
-## 3.0.x
-- 增加了`until`接口
+## 3.1.x
+- 增加了`until`接口，支持串行和并行
 
 ## 2.0.x
 - 增加了`try`、`catch`两个接口
