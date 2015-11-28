@@ -23,10 +23,6 @@ var async = function (callback) {
     }, timeout);
 };
 
-var rollback = function () {
-    console.log('回退任务', this.index);
-};
-
 var abort = function () {
     console.log('中止任务', this.index);
     clearTimeout(this.timeId);
@@ -51,26 +47,25 @@ describe('until', function () {
         howdo
             .task(async)
             .abort(abort)
-            .rollback(rollback)
-            //.task(async)
-            //.rollback(rollback)
-            //.task(async)
-            //.rollback(rollback)
-            //.task(async)
-            //.rollback(rollback)
-            //.task(async)
-            //.rollback(rollback)
-            //.task(async)
-            //.rollback(rollback)
-            //.task(async)
-            //.rollback(rollback)
-            //.task(async)
-            //.rollback(rollback)
-            //.task(async)
-            //.rollback(rollback)
-            //.task(async)
-            //.rollback(rollback)
-            //.task(async)
+            .task(async)
+            .abort(abort)
+            .task(async)
+            .abort(abort)
+            .task(async)
+            .abort(abort)
+            .task(async)
+            .abort(abort)
+            .task(async)
+            .abort(abort)
+            .task(async)
+            .abort(abort)
+            .task(async)
+            .abort(abort)
+            .task(async)
+            .abort(abort)
+            .task(async)
+            .abort(abort)
+            .task(async)
             .until(function (value) {
                 return value > 0.8;
             })
