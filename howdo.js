@@ -100,6 +100,7 @@ function Howdo() {
 
     the._executed = false;
     the._ignoreErr = false;
+    the._taskIndex = -1;
     the._taskList = [];
     the._tryCallbackList = [];
     the._catchCallbackList = [];
@@ -123,8 +124,10 @@ Howdo.prototype = {
             throw new TypeError('howdo `task` must be a function');
         }
 
+        the._taskIndex++;
         the._taskList.push(fn);
         the._contextList.push({
+            index: the._taskIndex,
             task: fn
         });
 
@@ -132,8 +135,19 @@ Howdo.prototype = {
     },
 
 
-    rollback: function () {
+    /**
+     * 添加任务回退、中止方法
+     * @param rollback {Function} 回退、中止方法
+     * @returns {Howdo}
+     */
+    rollback: function (rollback) {
+        var the = this;
 
+        if (the._taskIndex > -1 && isFunction(rollback)) {
+            the._contextList[the._taskIndex].rollback = rollback;
+        }
+
+        return the;
     },
 
 
@@ -200,12 +214,11 @@ Howdo.prototype = {
         the._executed = true;
 
         var current = 0;
-        var contextList = [];
         var count = the._taskList.length;
         var args = [];
         // 串行回退已成功的任务
         var rollbackTask = function () {
-            each(contextList, function (index, context) {
+            each(the._contextList, function (index, context) {
                 if (!context) {
                     return false;
                 }
@@ -257,10 +270,7 @@ Howdo.prototype = {
 
                 args.unshift(fn);
                 var task = the._taskList[current];
-                var context = contextList[current] = {
-                    index: current,
-                    task: task
-                };
+                var context = the._contextList[current];
                 task.apply(context, args);
             })();
         });
@@ -436,3 +446,6 @@ Howdo.prototype = {
         });
     }
 };
+
+//Howdo.prototype.serial = Howdo.prototype.follow;
+//Howdo.prototype.parallel = Howdo.prototype.together;
