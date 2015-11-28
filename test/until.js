@@ -29,7 +29,7 @@ var abort = function () {
 };
 
 describe('until', function () {
-    xit('follow', function (done) {
+    it('follow', function (done) {
         howdo
             .task(async)
             .until(function (value) {
