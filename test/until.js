@@ -13,12 +13,18 @@ var howdo = require('../howdo.js');
 var utils = require('./_utils.js');
 
 var async = function (callback) {
-    var timeout = utils.random(300, 500);
-    setTimeout(function () {
+    var index = this.index;
+    var timeout = utils.random(300, 900);
+    var timeId = setTimeout(function () {
         var value = Math.random();
-        console.log('[' + timeout + ']', value);
-        callback(timeout > 400 ? new Error('') : null, value);
+        console.log('[' + index + ']', value);
+        callback(null, value);
     }, timeout);
+
+    this.abort = function () {
+        console.log('被中止', this.index);
+        clearTimeout(timeId);
+    };
 };
 
 describe('until', function () {
@@ -41,6 +47,14 @@ describe('until', function () {
             .task(async)
             .task(async)
             .task(async)
+            .task(async)
+            .task(async)
+            .task(async)
+            .task(async)
+            .task(async)
+            .task(async)
+            .task(async)
+            .task(async)
             .until(function (value) {
                 return value > 0.8;
             })
@@ -53,7 +67,9 @@ describe('until', function () {
                     console.log('together fail');
                 }
 
-                done();
+                setTimeout(function () {
+                    done();
+                }, 1000);
             });
     });
 });

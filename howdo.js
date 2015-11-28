@@ -261,6 +261,7 @@ Howdo.prototype = {
                 var fn = function () {
                     args = slice.call(arguments);
 
+                    // has error
                     if (args[0] && !the._ignoreErr) {
                         return the._fixCallback(args[0]);
                     }
@@ -285,7 +286,8 @@ Howdo.prototype = {
                 };
 
                 args.unshift(fn);
-                tasks[current].apply(_global, args);
+                var task = tasks[current];
+                task.apply(task, args);
             })();
         });
 
@@ -333,22 +335,42 @@ Howdo.prototype = {
 
         var doneLength = 0;
         var tasks = the.tasks;
+        var contxtList = [];
         var count = tasks.length;
         var taskData = [];
         var hasCallback = false;
         var i = 0;
 
+        // 中止未完成的 task
+        var abortUndoneTask = function () {
+            for (i = 0; i < count; i++) {
+                var context = contxtList[i];
+
+                if (!context.done && isFunction(context.abort)) {
+                    context.done = true;
+                    context.abort.call(context);
+                }
+            }
+        };
+
         nextTick(function () {
             if (!count) {
+                hasCallback = true;
                 the._fixCallback();
                 return the;
             }
 
             for (; i < count; i++) {
+                contxtList[i] = {
+                    index: i,
+                    done: false,
+                    task: tasks[i]
+                };
                 _doTask(i, tasks[i]);
             }
 
             function _doTask(index, task) {
+                var context = contxtList[index];
                 var fn = function () {
                     if (hasCallback) {
                         return;
@@ -356,11 +378,14 @@ Howdo.prototype = {
 
                     var args = slice.call(arguments);
                     var ret = [];
-                    var i = 0;
+                    var j = 0;
+
+                    context.done = true;
 
                     // has Error
                     if (args[0] && !the._ignoreErr) {
                         hasCallback = true;
+                        abortUndoneTask();
                         return the._fixCallback(args[0]);
                     }
 
@@ -382,6 +407,8 @@ Howdo.prototype = {
                             }
 
                             ret.unshift(null);
+                            abortUndoneTask();
+                            hasCallback = true;
                             the._fixCallback.apply(the, ret);
                         }
                     } else {
@@ -389,17 +416,19 @@ Howdo.prototype = {
                         taskData[index] = value;
 
                         if (doneLength === count) {
-                            for (; i < taskData.length; i++) {
-                                ret = ret.concat(taskData[i]);
+                            for (; j < taskData.length; j++) {
+                                ret = ret.concat(taskData[j]);
                             }
 
                             ret.unshift(null);
+                            abortUndoneTask();
+                            hasCallback = true;
                             the._fixCallback.apply(the, ret);
                         }
                     }
                 };
 
-                task(fn);
+                task.call(context, fn);
             }
         });
 
