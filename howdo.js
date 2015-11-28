@@ -39,14 +39,20 @@ var each = function (object, callback) {
 
     if (object && object.constructor === Array) {
         for (i = 0, j = object.length; i < j; i++) {
-            callback(i, object[i]);
+            if (callback(i, object[i]) === false) {
+                break;
+            }
         }
     } else if (typeof object === "object") {
         for (i in object) {
             if (object.hasOwnProperty && object.hasOwnProperty(i)) {
-                callback(i, object[i]);
+                if (callback(i, object[i]) === false) {
+                    break;
+                }
             } else {
-                callback(i, object[i]);
+                if (callback(i, object[i]) === false) {
+                    break;
+                }
             }
         }
     }
@@ -191,8 +197,21 @@ Howdo.prototype = {
 
         var current = 0;
         var tasks = the.tasks;
+        var contextList = [];
         var count = tasks.length;
         var args = [];
+        var rollbackTask = function () {
+            each(contextList, function (index, context) {
+                if (!context) {
+                    return false;
+                }
+
+                if (!context.error && isFunction(context.rollback)) {
+                    context.rollback.call(context);
+                    context.error = null;
+                }
+            });
+        };
 
         nextTick(function () {
             if (!count) {
@@ -203,10 +222,13 @@ Howdo.prototype = {
             (function _follow() {
                 var fn = function () {
                     args = slice.call(arguments);
+                    var error = args[0];
 
                     // has error
-                    if (args[0] && !the._ignoreErr) {
-                        return the._fixCallback(args[0]);
+                    if (error && !the._ignoreErr) {
+                        context.error = error;
+                        rollbackTask();
+                        return the._fixCallback(error);
                     }
 
                     current++;
@@ -221,6 +243,7 @@ Howdo.prototype = {
                     }
 
                     if (canStop) {
+                        rollbackTask();
                         the._fixCallback.apply(the, args);
                     } else if (current < count) {
                         args.shift();
@@ -230,7 +253,11 @@ Howdo.prototype = {
 
                 args.unshift(fn);
                 var task = tasks[current];
-                task.apply(task, args);
+                var context = contextList[current] = {
+                    index: current,
+                    task: task
+                };
+                task.apply(context, args);
             })();
         });
 
@@ -265,7 +292,7 @@ Howdo.prototype = {
         var i = 0;
 
         // 中止未完成的 task
-        var abortUndoneTask = function () {
+        var abortTask = function () {
             for (i = 0; i < count; i++) {
                 var context = contxtList[i];
 
@@ -308,7 +335,7 @@ Howdo.prototype = {
                     // has Error
                     if (args[0] && !the._ignoreErr) {
                         hasCallback = true;
-                        abortUndoneTask();
+                        abortTask();
                         return the._fixCallback(args[0]);
                     }
 
@@ -330,7 +357,7 @@ Howdo.prototype = {
                             }
 
                             ret.unshift(null);
-                            abortUndoneTask();
+                            abortTask();
                             hasCallback = true;
                             the._fixCallback.apply(the, ret);
                         }
@@ -344,7 +371,7 @@ Howdo.prototype = {
                             }
 
                             ret.unshift(null);
-                            abortUndoneTask();
+                            abortTask();
                             hasCallback = true;
                             the._fixCallback.apply(the, ret);
                         }

@@ -14,7 +14,7 @@ var utils = require('./_utils.js');
 
 
 describe('follow', function () {
-    it('no each', function (done) {
+    xit('no each', function (done) {
         howdo
             .task(utils.async(1))
             .task(utils.async(2))
@@ -26,7 +26,8 @@ describe('follow', function () {
                 done();
             });
     });
-    it('each', function (done) {
+
+    xit('each', function (done) {
         howdo
             .each(new Array(4), function (index, value, next) {
                 utils.async(index + 1)(next);
@@ -35,6 +36,31 @@ describe('follow', function () {
             .try(function (value) {
                 assert.equal(value, 4);
                 done();
+            });
+    });
+
+    it('rollback', function (done) {
+        var a = 1;
+
+        howdo
+            .task(function (next) {
+                a++;
+                this.rollback = function () {
+                    console.log('rollback', 1);
+                    a--;
+                };
+                next();
+            })
+            .task(function (next) {
+                setTimeout(function () {
+                    next(new Error(''));
+                }, 1000);
+            })
+            .follow(function () {
+                setTimeout(function () {
+                    assert.equal(a, 1);
+                    done();
+                });
             });
     });
 });
