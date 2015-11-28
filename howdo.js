@@ -112,20 +112,6 @@ Howdo.prototype = {
      * @param {Function} fn 任务函数
      * @return Howdo
      * @chainable
-     * @example
-     * // next约定为串行执行汇报，后面接follow
-     * // 建议next只返回一个结果
-     * // err对象必须是Error的实例
-     * howdo.task(function(next){
-         *     next(new Error('错误'), 1);
-         * });
-     *
-     * // done约定为并行执行汇报，后面接together
-     * // 建议done只返回一个结果
-     * // err对象必须是Error的实例
-     * howdo.task(function(){
-         *     done(new Error('错误'), 1);
-         * });
      */
     task: function (fn) {
         var the = this;
@@ -166,29 +152,6 @@ Howdo.prototype = {
      * @param  {Object}   object   对象或者数组
      * @param  {Function} callback 回调
      * @return Howdo
-     * @example
-     * // follow
-     * // err对象必须是Error的实例
-     * howdo.each([1, 2, 3], function(key, val, next, lastData){
-         *     // lastData 第1次为 undefined
-         *     // lastData 第2次为 1
-         *     // lastData 第3次为 2
-         *     next(null, val);
-         * }).follow(function(err, data){
-         *     // err = null
-         *     // data = 3
-         * });
-     *
-     * // together
-     * // err对象必须是Error的实例
-     * howdo.each([1, 2, 3], function(key, val, done){
-         *     done(null, val);
-         * }).together(function(err, data1, data2, dat3){
-         *     // err = null
-         *     // data1 = 1
-         *     // data2 = 2
-         *     // data3 = 3
-         * });
      */
     each: function (object, callback) {
         var howdo = this;
@@ -211,26 +174,6 @@ Howdo.prototype = {
      * 跟着做，任务串行执行
      * 链式结束
      * @param [callback] {Function} 回调
-     * @example
-     * howdo
-     * .task(function(next){
-         *     next(null, 1);
-         * })
-     * .task(function(next, data){
-         *     // data = 1
-         *     next(null, 2, 3);
-         * })
-     * .task(function(next, data1, data2){
-         *     // data1 = 2
-         *     // data2 = 3
-         *     next(null, 4, 5, 6);
-         * })
-     * .follow(function(err, data1, data2, data3){
-         *     // err = null
-         *     // data1 = 1
-         *     // data2 = 2
-         *     // data3 = 3
-         * });
      */
     follow: function (callback) {
         var the = this;
@@ -298,26 +241,6 @@ Howdo.prototype = {
      * 一起做，任务并行执行
      * 链式结束
      * @param [callback] {Function} 回调
-     * @example
-     * howdo
-     * .task(function(done){
-         *     done(null, 1);
-         * })
-     * .task(function(done){
-         *     done(null, 2, 3);
-         * })
-     * .task(function(done){
-         *     done(null, 4, 5, 6);
-         * })
-     * .together(function(err, data1, data2, data3, data4, data5, data6){
-         *     // err = null
-         *     // data1 = 1
-         *     // data2 = 2
-         *     // data3 = 3
-         *     // data4 = 4
-         *     // data5 = 5
-         *     // data6 = 6
-         * });
      */
     together: function (callback) {
         var the = this;
@@ -347,8 +270,8 @@ Howdo.prototype = {
                 var context = contxtList[i];
 
                 if (!context.done && isFunction(context.abort)) {
-                    context.done = true;
                     context.abort.call(context);
+                    context.done = true;
                 }
             }
         };

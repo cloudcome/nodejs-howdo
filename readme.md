@@ -196,8 +196,10 @@ howdo
 
 
 # VERSION
-## 3.1.x
+## 3.2.x
 - 增加了`until`接口，支持串行和并行
+- 支持了串行出错回滚`this.rollback`
+- 支持了并行出错中止`this.abort`
 
 ## 2.0.x
 - 增加了`try`、`catch`两个接口
