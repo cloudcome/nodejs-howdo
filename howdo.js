@@ -98,17 +98,13 @@ module.exports = {
 function Howdo() {
     var the = this;
 
-    // 任务队列
-    the.tasks = [];
-    // 是否已经开始执行任务了
     the._executed = false;
-    // 标识任务序号
-    the.index = 0;
+    the._ignoreErr = false;
+    the._taskList = [];
     the._tryCallbackList = [];
     the._catchCallbackList = [];
-    the._contexts = [];
+    the._contextList = [];
     the._allCallback = null;
-    the._ignoreErr = false;
 }
 
 Howdo.prototype = {
@@ -127,8 +123,10 @@ Howdo.prototype = {
             throw new TypeError('howdo `task` must be a function');
         }
 
-        fn.index = the.index++;
-        the.tasks.push(fn);
+        the._taskList.push(fn);
+        the._contextList.push({
+            task: fn
+        });
 
         return the;
     },
@@ -202,9 +200,8 @@ Howdo.prototype = {
         the._executed = true;
 
         var current = 0;
-        var tasks = the.tasks;
         var contextList = [];
-        var count = tasks.length;
+        var count = the._taskList.length;
         var args = [];
         // 串行回退已成功的任务
         var rollbackTask = function () {
@@ -259,7 +256,7 @@ Howdo.prototype = {
                 };
 
                 args.unshift(fn);
-                var task = tasks[current];
+                var task = the._taskList[current];
                 var context = contextList[current] = {
                     index: current,
                     task: task
@@ -291,9 +288,8 @@ Howdo.prototype = {
         the._executed = true;
 
         var doneLength = 0;
-        var tasks = the.tasks;
         var contxtList = [];
-        var count = tasks.length;
+        var count = the._taskList.length;
         var taskData = [];
         var hasCallback = false;
         var i = 0;
@@ -319,9 +315,9 @@ Howdo.prototype = {
                 contxtList[i] = {
                     index: i,
                     done: false,
-                    task: tasks[i]
+                    task: the._taskList[i]
                 };
-                _doTask(i, tasks[i]);
+                _doTask(i, the._taskList[i]);
             }
 
             function _doTask(index, task) {
