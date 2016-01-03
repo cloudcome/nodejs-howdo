@@ -269,8 +269,11 @@ Howdo.prototype = {
                     var canStop = false;
 
                     if (the._untilCondition) {
-                        canStop = the._untilCondition.apply(_global, args.slice(1));
-                        current += canStop ? 0 : -1;
+                        // 一轮任务完成
+                        if (current === count) {
+                            canStop = the._untilCondition.apply(_global, args.slice(1));
+                            current += canStop ? 0 : -count;
+                        }
                     } else {
                         canStop = current === count;
                     }

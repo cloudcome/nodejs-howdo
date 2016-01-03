@@ -12,13 +12,24 @@ var howdo = require('../howdo.js');
 
 var utils = require('./_utils.js');
 
-var async = function (callback) {
+var async1 = function (callback) {
     var index = this.index;
     var timeout = utils.random(300, 900);
 
     this.timeId = setTimeout(function () {
         var value = Math.random();
-        console.log('[' + index + ']', value);
+        console.log('async1', '[' + index + ']', value);
+        callback(null, value);
+    }, timeout);
+};
+
+var async2 = function (callback) {
+    var index = this.index;
+    var timeout = utils.random(300, 900);
+
+    this.timeId = setTimeout(function () {
+        var value = Math.random();
+        console.log('async2', '[' + index + ']', value);
         callback(null, value);
     }, timeout);
 };
@@ -31,7 +42,8 @@ var abort = function () {
 describe('until', function () {
     it('follow', function (done) {
         howdo
-            .task(async)
+            .task(async1)
+            .task(async2)
             .until(function (value) {
                 return value > 0.8;
             })
@@ -43,29 +55,29 @@ describe('until', function () {
             });
     });
 
-    it('together', function (done) {
+    xit('together', function (done) {
         howdo
-            .task(async)
+            .task(async1)
             .abort(abort)
-            .task(async)
+            .task(async1)
             .abort(abort)
-            .task(async)
+            .task(async1)
             .abort(abort)
-            .task(async)
+            .task(async1)
             .abort(abort)
-            .task(async)
+            .task(async1)
             .abort(abort)
-            .task(async)
+            .task(async1)
             .abort(abort)
-            .task(async)
+            .task(async1)
             .abort(abort)
-            .task(async)
+            .task(async1)
             .abort(abort)
-            .task(async)
+            .task(async1)
             .abort(abort)
-            .task(async)
+            .task(async1)
             .abort(abort)
-            .task(async)
+            .task(async1)
             .until(function (value) {
                 return value > 0.8;
             })
