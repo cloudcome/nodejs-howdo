@@ -55,7 +55,7 @@ describe('until', function () {
             });
     });
 
-    xit('together', function (done) {
+    it('together', function (done) {
         howdo
             .task(async1)
             .abort(abort)
